@@ -2,6 +2,7 @@ package com.abhisek.gateway;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -14,9 +15,13 @@ import com.abhisek.gateway.bluepay.utils.BluePay;
 import com.abhisek.gateway.bluepay.utils.BluePayDataManager;
 import com.abhisek.gateway.bluepay.utils.ConfigurationVO;
 import com.abhisek.gateway.object.CustomerCreditCardData;
+import com.abhisek.gateway.object.ItemDetails;
+import com.abhisek.gateway.object.ItemUpc;
 import com.abhisek.gateway.object.ResponseVO;
 import com.abhisek.gateway.repository.CardDetails;
 import com.abhisek.gateway.repository.CardService;
+import com.abhisek.gateway.repository.ItemRepository;
+import com.abhisek.gateway.service.ItemService;
 
 @RestController
 @RequestMapping("/payment")
@@ -31,6 +36,8 @@ public class PaymentController {
 	private ConfigurationVO configurationVO;
 	@Autowired
 	private CardService cardService;
+	@Autowired
+	private ItemService itemService;
 
 	@PostMapping(path = "/chargeCustomerCC/v1.0", consumes = "application/json", produces = "application/json")
 	public ResponseVO chargeCustomerCC(@RequestBody CustomerCreditCardData customerCreditCardData) throws Exception {
@@ -60,7 +67,6 @@ public class PaymentController {
 		return responseVO;
 	}
 
-	@CrossOrigin(origins = "http://127.0.0.1:4200")
 	@PostMapping(path = "/chargeCustomerWithToken/v1.0", consumes = "application/json", produces = "application/json")
 	public ResponseVO chargeCustomerWithToken(@RequestBody CustomerCreditCardData customerCreditCardData)
 			throws Exception {
@@ -102,8 +108,7 @@ public class PaymentController {
 
 	@CrossOrigin(origins = "http://127.0.0.1:4200")
 	@GetMapping(path = "/getCustomerData/v1.0", produces = "application/json")
-	public ArrayList<CustomerCreditCardData> getCustomerData()
-			throws Exception {
+	public ArrayList<CustomerCreditCardData> getCustomerData() throws Exception {
 		ArrayList<CustomerCreditCardData> cardList = new ArrayList<>();
 		List<CardDetails> listDetails = cardService.getAll();
 
@@ -115,6 +120,17 @@ public class PaymentController {
 			cardList.add(creditCardData);
 		}
 		return cardList;
+	}
+
+	@GetMapping(path = "/helloWorld", produces = "application/json")
+	public String helloWorld() throws Exception {
+		return "Hello World";
+	}
+
+	@PostMapping(path = "/getItemDetails", consumes = "application/json", produces = "application/json")
+	public ItemDetails getItemDetails(@RequestBody CustomerCreditCardData customerCreditCardData) throws Exception {
+
+		return itemService.read(customerCreditCardData.getAddress1());
 	}
 
 }
